@@ -4,135 +4,163 @@ import feedparser
 
 # 1. Page Configuration for optimal mobile scannability
 st.set_page_config(
-    page_title="Gold Core-Lock Matrix",
+    page_title="Gold Core-Lock Cockpit",
     page_icon="🔱",
     layout="centered",
     initial_sidebar_state="collapsed"
 )
 
-st.title("🦅 Gold Core-Lock Alpha Matrix")
-st.markdown("##### Priority Intermarket Alignment & Consensus Filter Engine")
+# Custom Institutional CSS Injector for Dark Mode Accent Styles
+st.markdown("""
+    <style>
+    .metric-card {
+        background-color: #0E1612;
+        border: 1px solid #1E3A24;
+        padding: 15px;
+        border-radius: 10px;
+        text-align: center;
+        margin-bottom: 15px;
+    }
+    .gauge-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 20px 0;
+    }
+    .gauge-bg {
+        width: 100%;
+        max-width: 400px;
+        background: #121A16;
+        border-radius: 20px;
+        border: 1px solid #233D2A;
+        padding: 20px;
+        text-align: center;
+    }
+    .status-text {
+        font-size: 24px;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        margin-top: 10px;
+    }
+    </style>
+""", unsafe_style_allowed=True)
+
+st.title("⚜️ Gold Alpha Intelligence Cockpit")
+st.markdown("##### Institutional Macroeconomic Alignment & Sentiment Consensus Matrix")
 
 def calculate_headline_sentiment(headline_text):
     text_lower = headline_text.lower()
-    bullish_keywords = [
-        'rate cut', 'inflation spike', 'recession', 'escalation', 'safe haven', 
-        'banking crisis', 'fed dovish', 'gold rally', 'crisis', 'panic', 'war', 
-        'geopolitical', 'uncertainty', 'conflict', 'sanctions', 'de-dollarization'
-    ]
-    bearish_keywords = [
-        'rate hike', 'strong jobs', 'fed hawkish', 'gdp growth', 'economic boom', 
-        'dollar surge', 'inflation falls', 'rate increases', 'hawkish fed', 'strong economy'
-    ]
-    
+    bullish_keywords = ['rate cut', 'inflation spike', 'recession', 'escalation', 'safe haven', 'banking crisis', 'fed dovish', 'gold rally', 'crisis', 'panic', 'war', 'geopolitical', 'uncertainty', 'conflict', 'sanctions']
+    bearish_keywords = ['rate hike', 'strong jobs', 'fed hawkish', 'gdp growth', 'economic boom', 'dollar surge', 'inflation falls', 'rate increases', 'hawkish fed', 'strong economy']
     score = 0.0
     for word in bullish_keywords:
         if word in text_lower: score += 1.5
     for word in bearish_keywords:
         if word in text_lower: score -= 1.5
     return score
+
 # Processing Trigger
-if st.button("EXECUTE CORE-LOCK CONSENSUS SCAN", type="primary", use_container_width=True):
+if st.button("RUN DEEP SECTOR LIQUIDITY AND METRIC SCAN", type="primary", use_container_width=True):
     
-    with st.spinner("Evaluating Tier-1 Priority Anchors (DXY, Yields, Miners)..."):
+    with st.spinner("Compiling cross-asset consensus framework database..."):
         
         error_logs = []
-        ticker_details = []
+        news_log_entries = []
+        table_rows = [] # Storage grid list for our performance metrics scorecard
         
-        # --- TRACK TIER-1 CORE MACRO ANCHORS ---
-        core_direction = 0 #  0 = Conflict, 1 = Perfect Bullish Core, -1 = Perfect Bearish Core
-        dxy_score = 0.0
-        tlt_score = 0.0   # (TLT rising means yields are dropping)
+        # --- INITIALIZE RAW SECTOR POINTER DATA FIELDS ---
+        dxy_pct, tlt_pct, vix_pct, spy_pct, tip_pct, fxe_pct = 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+        dxy_val, tlt_val, vix_val, spy_val, tip_val, fxe_val = 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+        dxy_score, tlt_score, miner_points, secondary_points, news_points = 0.0, 0.0, 0.0, 0.0, 0.0
         
+        core_direction = 0 
+        headline_counter = 0
+
+        # --- TRACK TIER-1 PRIORITY ANCHOR: DXY INDEX ---
         try:
             dxy_data = yf.Ticker("DX-Y.NYB").history(period="7d")
-            tlt_data = yf.Ticker("TLT").history(period="7d")
-            
-            if len(dxy_data) >= 2 and len(tlt_data) >= 2:
-                dxy_pct = ((dxy_data['Close'].iloc[-1] - dxy_data['Close'].iloc[-2]) / dxy_data['Close'].iloc[-2]) * 100
-                tlt_pct = ((tlt_data['Close'].iloc[-1] - tlt_data['Close'].iloc[-2]) / tlt_data['Close'].iloc[-2]) * 100
-                
+            if len(dxy_data) >= 2:
+                dxy_val = dxy_data['Close'].iloc[-1]
+                dxy_pct = ((dxy_val - dxy_data['Close'].iloc[-2]) / dxy_data['Close'].iloc[-2]) * 100
                 dxy_score = 2.0 if dxy_pct <= 0 else -2.0
-                tlt_score = 2.0 if tlt_pct > 0 else -2.0
-                
-                dxy_status = "🟢 DXY Falling (Bullish)" if dxy_pct <= 0 else "🔴 DXY Rising (Bearish)"
-                tlt_status = "🟢 Yields Dropping (Bullish)" if tlt_pct > 0 else "🔴 Yields Rising (Bearish)"
-                
-                ticker_details.append(f"**DXY Index**: {dxy_status} | *Weight: {dxy_score:+.1f} pts*")
-                ticker_details.append(f"**US10Y Bond Proxy (TLT)**: {tlt_status} | *Weight: {tlt_score:+.1f} pts*")
-            else:
-                error_logs.append("❌ Core Tickers: Broken data frame structure array from server.")
-        except Exception as e:
-            error_logs.append(f"⚠️ Core Tickers Connection Error: {str(e)}")
+                table_rows.append({"Type": "🔴 Primary Core", "Asset": "DXY (US Dollar Index)", "Value": f"{dxy_val:.2f}", "Change %": f"{dxy_pct:+.2f}%", "Points": f"{dxy_score:+.1f}"})
+            else: error_logs.append("❌ DXY Index: Data package structure array loading failure.")
+        except: error_logs.append("⚠️ DXY Index Index Data Feed Timeout.")
 
-        # --- TRACK TIER-1 MINERS basket CONSENSUS ---
+        # --- TRACK TIER-1 PRIORITY ANCHOR: BOND YIELDS PROXY ---
+        try:
+            tlt_data = yf.Ticker("TLT").history(period="7d")
+            if len(tlt_data) >= 2:
+                tlt_val = tlt_data['Close'].iloc[-1]
+                tlt_pct = ((tlt_val - tlt_data['Close'].iloc[-2]) / tlt_data['Close'].iloc[-2]) * 100
+                tlt_score = 2.0 if tlt_pct > 0 else -2.0
+                table_rows.append({"Type": "🔴 Primary Core", "Asset": "US10Y Yield Proxy (TLT)", "Value": f"${tlt_val:.2f}", "Change %": f"{tlt_pct:+.2f}%", "Points": f"{tlt_score:+.1f}"})
+            else: error_logs.append("❌ Bond Yields: Data package structure array loading failure.")
+        except: error_logs.append("⚠️ Bond Yields Data Feed Timeout.")
+
+        # --- TRACK TIER-1 PRIORITY ANCHOR: MINERS basket CONSENSUS ---
         miner_basket = {"Barrick Gold": "GOLD", "Newmont Corp": "NEM", "Gold Fields": "GFI", "Agnico Eagle": "AEM", "Junior Miners ETF": "GDXJ"}
         miner_directions = []
         miner_errors = 0
+        miner_val_sum = 0.0
+        miner_pct_sum = 0.0
         
         for m_name, m_symbol in miner_basket.items():
             try:
                 m_data = yf.Ticker(m_symbol).history(period="7d")
                 if len(m_data) >= 2:
-                    m_change = m_data['Close'].iloc[-1] - m_data['Close'].iloc[-2]
+                    m_val = m_data['Close'].iloc[-1]
+                    m_change = ((m_val - m_data['Close'].iloc[-2]) / m_data['Close'].iloc[-2]) * 100
+                    miner_val_sum += m_val
+                    miner_pct_sum += m_change
                     miner_directions.append(1 if m_change > 0 else -1)
                 else: miner_errors += 1
             except: miner_errors += 1
                 
-        miner_points = 0.0
-        miner_status_display = "⚪ MIXED CHOP MARKET ACTION (Miners are fighting each other)"
-        
         if miner_errors == 0 and len(miner_directions) == 5:
+            avg_m_val = miner_val_sum / 5
+            avg_m_pct = miner_pct_sum / 5
             if all(d == 1 for d in miner_directions):
                 miner_points = 2.5
-                miner_status_display = "🟢 UNANIMOUS BULLISH ACCUMULATION (All 5 Giants are rising)"
             elif all(d == -1 for d in miner_directions):
                 miner_points = -2.5
-                miner_status_display = "🔴 UNANIMOUS BEARISH DISTRIBUTION (All 5 Giants are falling)"
+            table_rows.append({"Type": "🔴 Primary Core", "Asset": "Miners Basket (5 Giants)", "Value": f"Avg: ${avg_m_val:.2f}", "Change %": f"{avg_m_pct:+.2f}%", "Points": f"{miner_points:+.1f}"})
         else:
-            error_logs.append("⚠️ Miners Basket: Isolated due to background server latency pings.")
+            error_logs.append("⚠️ Gold Miners Basket Data Feed Latency Timeout.")
 
-        # --- EVALUATE STRICTOR TIER-1 CORE-LOCK ALIGNMENT GATE ---
+        # --- VERIFY CRITICAL CORE-LOCK GATE ---
         if dxy_score == 2.0 and tlt_score == 2.0 and miner_points == 2.5:
-            core_direction = 1 # Perfect Bullish Core Lock Unlocked
+            core_direction = 1  # Bullish Lock Unlocked
         elif dxy_score == -2.0 and tlt_score == -2.0 and miner_points == -2.5:
-            core_direction = -1 # Perfect Bearish Core Lock Unlocked
-        else:
-            core_direction = 0 # CORE DIRECTIVES CONFLICTING -> Force Immediate Safe Wait Halt
-        master_score = dxy_score + tlt_score + miner_points
-        headline_counter = 0
-        news_points = 0.0
-        news_log_entries = []
+            core_direction = -1 # Bearish Lock Unlocked
 
-        # Process secondary multipliers ONLY if the strict core priority anchors match direction perfectly
+        # --- TRACK TIER-2 SECONDARY MACRO ANCHORS ---
+        secondary_tickers = {"VIX (CBOE Fear Index)": "^VIX", "SPY (S&P 500 Benchmark)": "SPY", "TIP (Real Yields Tracker)": "TIP", "FXE (Euro Safe Haven Flux)": "FXE"}
+        
+        for name, symbol in secondary_tickers.items():
+            try:
+                data = yf.Ticker(symbol).history(period="7d")
+                if len(data) >= 2:
+                    val = data['Close'].iloc[-1]
+                    pct = ((val - data['Close'].iloc[-2]) / data['Close'].iloc[-2]) * 100
+                    
+                    # Core scorecard points weights calculations
+                    if symbol == "^VIX": w = 1.5 if val > 20 else -0.5
+                    elif symbol == "SPY": w = -1.0 if pct > 0 else 1.0
+                    elif symbol == "TIP": w = 1.5 if pct > 0 else -1.5
+                    elif symbol == "FXE": w = -1.0 if pct > 0 else 1.5
+                    
+                    if core_direction != 0:
+                        secondary_points += w
+                        table_rows.append({"Type": "🔵 Secondary Vector", "Asset": name, "Value": f"{val:.2f}" if symbol == "^VIX" else f"${val:.2f}", "Change %": f"{pct:+.2f}%", "Points": f"{w:+.1f}"})
+                    else:
+                        table_rows.append({"Type": "🔵 Secondary Vector", "Asset": name, "Value": f"{val:.2f}" if symbol == "^VIX" else f"${val:.2f}", "Change %": f"{pct:+.2f}%", "Points": "LOCKED"})
+            except:
+                error_logs.append(f"⚠️ {name} Connection Latency Timeout.")
+
+        # --- PARSE LIVE RSS NEWS DATA STREAMS ---
         if core_direction != 0:
-            secondary_tickers = {"VIX (CBOE Fear Index)": "^VIX", "SPY (S&P 500 Stock Benchmark)": "SPY", "TIP (Real Yields Tracker)": "TIP", "FXE (Euro Safe Haven Flux)": "FXE"}
-            for name, symbol in secondary_tickers.items():
-                try:
-                    data = yf.Ticker(symbol).history(period="7d")
-                    if len(data) >= 2:
-                        prev_close = data['Close'].iloc[-2]
-                        curr_close = data['Close'].iloc[-1]
-                        pct_change = ((curr_close - prev_close) / prev_close) * 100
-                        
-                        if symbol == "^VIX":
-                            w = 1.5 if curr_close > 20 else -0.5
-                            status = f"📊 Volatility Level: {curr_close:.2f}"
-                        elif symbol == "SPY":
-                            w = -1.0 if pct_change > 0 else 1.0
-                            status = "🔴 Rallying (Risk-On)" if pct_change > 0 else "🟢 Correcting (Risk-Off)"
-                        elif symbol == "TIP":
-                            w = 1.5 if pct_change > 0 else -1.5
-                            status = "🟢 Bonds Inflow (Bullish)" if pct_change > 0 else "🔴 Bonds Outflow (Bearish)"
-                        elif symbol == "FXE":
-                            w = -1.0 if pct_change > 0 else 1.5
-                            status = "🔴 Euro Strong" if pct_change > 0 else "🟢 Inflows Active"
-                            
-                        master_score += w
-                        ticker_details.append(f"**{name}**: {status} | *Weight: {w:+.1f} pts*")
-                except: pass
-
-            # --- LIVE NEWS SENTIMENT INTEGRATION MODULE ---
             rss_urls = ["https://google.com", "https://google.com"]
             news_score_total = 0.0
             for url in rss_urls:
@@ -143,42 +171,58 @@ if st.button("EXECUTE CORE-LOCK CONSENSUS SCAN", type="primary", use_container_w
                         comp_score = calculate_headline_sentiment(text_headline)
                         news_score_total += comp_score
                         headline_counter += 1
-                        tag = "🟢 Bullish" if comp_score > 0 else "🔴 Bearish" if comp_score < 0 else "⚪ Neutral"
+                        tag = "🟢 Bull" if comp_score > 0 else "🔴 Bear" if comp_score < 0 else "⚪ Neut"
                         news_log_entries.append(f"*{tag}* -> {text_headline}")
                 except: pass
             news_points = max(-1.5, min(1.5, news_score_total))
-            master_score += news_points
+            table_rows.append({"Type": "🔵 Secondary Vector", "Asset": f"News Sentiment ({headline_counter} items)", "Value": "NLP Text", "Change %": "N/A", "Points": f"{news_points:+.1f}"})
+        else:
+            table_rows.append({"Type": "🔵 Secondary Vector", "Asset": "News Sentiment Scorer", "Value": "LOCKED", "Change %": "LOCKED", "Points": "LOCKED"})
 
-        # --- PHASE 4: RENDER RESPONSIVE MOBILE DASHBOARD INTERFACE CANVAS ---
-        st.markdown("---")
-        st.subheader("📊 Definitive Priority Directive")
-        
+        # Master Net Score Consolidation Formula
+        master_final_score = dxy_score + tlt_score + miner_points + secondary_points + news_points
+        if core_direction == 0: master_final_score = 0.0
+
+               # --- PHASE 3: RENDER THE SPEEDOMETER METER HUD ---
+        # Map master metrics scores dynamically onto our color spectrum panel labels
         if core_direction == 0:
-            st.warning("### ⏳ DIRECTION: CORE MATRIX CONFLICT / CHOP WAIT\n"
-                       "**Reason**: Your core priority pillars (DXY, Yields, and Miners) are out of alignment. "
-                       "The fundamental engine has blocked all further scans to save your trading capital from sideways range traps.")
-        elif core_direction == 1:
-            if master_score >= 6.0:
-                st.success("### 🔥 DIRECTION: STRONG BULLISH BUY\nCore pillars are locked long, and secondary multipliers confirm heavy macro tailwinds.")
-            else:
-                st.success("### 📈 DIRECTION: STANDARD BULLISH BUY\nCore anchors confirm buy alignment, but secondary market vectors sit flat.")
-        elif core_direction == -1:
-            if master_score <= -6.0:
-                st.error("### 📉 DIRECTION: STRONG BEARISH SELL\nCore pillars are locked short, and institutions are heavily distributing safe-haven liquidity.")
-            else:
-                st.error("### 📉 DIRECTION: STANDARD BEARISH SELL\nCore anchors confirm short alignment, but secondary market sentiment sits flat.")
+            label_text, panel_color, text_color = "CHOP WAIT / FLAT", "#FF9900", "#FFFFFF"
+        elif master_final_score >= 5.5:
+            label_text, panel_color, text_color = "STRONG BUY", "#00FF66", "#000000"
+        elif master_final_score >= 1.0:
+            label_text, panel_color, text_color = "BUY", "#88FF88", "#000000"
+        elif master_final_score <= -5.5:
+            label_text, panel_color, text_color = "STRONG SELL", "#FF0033", "#FFFFFF"
+        else:
+            label_text, panel_color, text_color = "SELL", "#FF8888", "#000000"
 
-        st.metric(label="Consensus Score Summary", value=f"{master_score:+.2f} Points" if core_direction != 0 else "0.00 LOCKED", delta="Priority lock requires un-conflicting Tier-1 alignment")
+        # HTML/CSS Injection Layer for the Professional Visual Meter HUD
+        st.markdown(f"""
+            <div class="gauge-container">
+                <div class="gauge-bg">
+                    <div style="font-size: 14px; text-transform: uppercase; color: #889988; letter-spacing: 1px;">Market Directive Meter</div>
+                    <div class="status-text" style="color: {panel_color}; text-shadow: 0 0 10px {panel_color}44;">{label_text}</div>
+                    <div style="font-size: 28px; font-weight: bold; margin-top: 5px; color: #FFFFFF;">{master_final_score:+.2f} <span style="font-size:14px; color:#888;">PTS</span></div>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+
+        # --- PHASE 4: RENDER THE PROFESSIONAL SCORECARD PERFORMANCE TABLE ---
+        st.subheader("📋 Macro Portfolio Scorecard Matrix")
         
-        with st.expander("🔎 View Macro Assets Priority Matrix Breakdown", expanded=True):
-            for detail in ticker_details: st.write(detail)
-            st.write(f"**Gold Miners Basket Consensus**: {miner_status_display} | *Weight: {miner_points:+.1f} pts*")
-                
+        # Build out and view the interactive DataFrame Grid sorted by asset priority levels
+        import pandas as pd
+        df_scorecard = pd.DataFrame(table_rows)
+        st.dataframe(df_scorecard, use_container_width=True, hide_index=True)
+
+        # --- PHASE 5: DROPDOWN AUDIT AND DIAGNOSTIC LOGS TRACING SECTIONS ---
         if core_direction != 0 and headline_counter > 0:
-            with st.expander(f"📰 View Scraped Headline Database Logs ({headline_counter} items)", expanded=False):
-                st.write(f"**Headline Structural Impact Score**: `{news_points:+.2f} pts`")
-                for log in news_log_entries: st.write(log)
+            with st.expander("📰 Trace Scraped Headline Intelligence Streams", expanded=False):
+                for entry in news_log_entries: 
+                    st.write(entry)
                 
         if len(error_logs) > 0:
-            with st.expander("⚠️ View Real-Time Server Error Audits", expanded=False):
-                for err in error_logs: st.write(err)
+            with st.expander("⚠️ Review Active Connectivity Diagnostic Audits", expanded=False):
+                for log in error_logs: 
+                    st.error(log)
+
