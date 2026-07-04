@@ -67,6 +67,7 @@ def calculate_headline_sentiment(headline_text):
     for word in bearish_keywords:
         if word in text_lower: score -= 1.5
     return score
+
 # Processing Trigger
 if st.button("RUN DEEP SECTOR LIQUIDITY AND METRIC SCAN", type="primary", use_container_width=True):
     
@@ -152,6 +153,7 @@ if st.button("RUN DEEP SECTOR LIQUIDITY AND METRIC SCAN", type="primary", use_co
             core_direction = 1  # Bullish Lock Passed
         elif dxy_score == -2.0 and tlt_score == -2.0 and miner_points == -2.5:
             core_direction = -1 # Bearish Lock Passed
+
         # --- TRACK TIER-2 SECONDARY MACRO ANCHORS ---
         secondary_tickers = {"VIX (CBOE Fear Index)": "^VIX", "SPY (S&P 500 Benchmark)": "SPY", "TIP (Real Yields Tracker)": "TIP", "FXE (Euro Safe Haven Flux)": "FXE"}
         
@@ -198,8 +200,7 @@ if st.button("RUN DEEP SECTOR LIQUIDITY AND METRIC SCAN", type="primary", use_co
         # Master Net Score Calculation Formula
         master_final_score = dxy_score + tlt_score + miner_points + secondary_points + news_points
         if core_direction == 0: master_final_score = 0.0
-
-                # --- PHASE 3: RENDER THE SPEEDOMETER METER HUD ---
+        # --- PHASE 3: RENDER THE SPEEDOMETER METER HUD ---
         if core_direction == 0:
             label_text, panel_color = "CHOP WAIT / FLAT", "#FF9900"
             needle_angle = 90 
@@ -225,7 +226,7 @@ if st.button("RUN DEEP SECTOR LIQUIDITY AND METRIC SCAN", type="primary", use_co
                         <path d="M60,43 A80,80 0 0,1 140,43" fill="none" stroke="#FF9900" stroke-width="4" opacity="0.4"/>
                         <path d="M140,43 A80,80 0 0,1 180,100" fill="none" stroke="#00FF66" stroke-width="4" opacity="0.4"/>
                         
-                        <!-- FIXED TEXT CLIPPING: Shifted coordinates and changed text-anchor alignments to stay within viewport -->
+                        <!-- Fixed Text Boundaries (Coordinates adjusted to fit mobile viewports) -->
                         <text x="5" y="108" fill="#889988" font-size="7" font-family="Arial" text-anchor="start">STRONG SELL</text>
                         <text x="48" y="38" fill="#889988" font-size="7" font-family="Arial" text-anchor="middle">SELL</text>
                         <text x="100" y="14" fill="#889988" font-size="8" font-family="Arial" text-anchor="middle" font-weight="bold">NEUTRAL</text>
@@ -244,17 +245,3 @@ if st.button("RUN DEEP SECTOR LIQUIDITY AND METRIC SCAN", type="primary", use_co
                 </div>
             </div>
         """, unsafe_allow_html=True)
-
-        # --- PHASE 4: RENDER THE PROFESSIONAL SCORECARD PERFORMANCE TABLE ---
-        st.subheader("📋 Macro Portfolio Scorecard Matrix")
-        df_scorecard = pd.DataFrame(table_rows)
-        st.dataframe(df_scorecard, use_container_width=True, hide_index=True)
-
-        # Dropdown Logs Tracing Sections
-        if core_direction != 0 and headline_counter > 0:
-            with st.expander("📰 Trace Scraped Headline Intelligence Streams", expanded=False):
-                for entry in news_log_entries: st.write(entry)
-                
-        if len(error_logs) > 0:
-            with st.expander("⚠️ Review Active Connectivity Diagnostic Audits", expanded=True):
-                for log in error_logs: st.error(log)
