@@ -31,9 +31,8 @@ def calculate_headline_sentiment(headline_text):
     for word in bearish_keywords:
         if word in text_lower: score -= 1.5
     return score
-
 # Processing Trigger
-if st.button("EXECUTE ALL-SECTOR CONSENSENS SCAN", type="primary", use_container_width=True):
+if st.button("EXECUTE ALL-SECTOR CONSENSUS SCAN", type="primary", use_container_width=True):
     
     with st.spinner("Analyzing global intermarket data streams..."):
         
@@ -41,19 +40,20 @@ if st.button("EXECUTE ALL-SECTOR CONSENSENS SCAN", type="primary", use_container
         ticker_details = []
         error_logs = []
         
-        # --- CORE MACRO ANCHORS ---
+        # --- HARDENED WEEKEND-PROOF MACRO ANCHORS ---
         macro_tickers = {
             "DXY (US Dollar Index)": "DX-Y.NYB",
-            "US10Y (10-Yr Bond Yield)": "^TNX",
+            "TLT (Long-Term Bond Flow - US10Y Proxy)": "TLT", # Replaced ^TNX with weekend-stable asset
             "VIX (CBOE Fear Gauge Index)": "^VIX",
             "SPY (S&P 500 Market Benchmark)": "SPY",
             "TIP (Real Yields Tracker)": "TIP",
-            "XAU/EUR (Global Safe Haven Flux)": "XAUEUR=X"
+            "FXE (Euro Currency Safe Haven Flux Proxy)": "FXE"  # Replaced XAUEUR=X with weekend-stable asset
         }
         
         for name, symbol in macro_tickers.items():
             try:
-                data = yf.Ticker(symbol).history(period="3d") # Expanded lookup depth to prevent weekend empty reads
+                # Expanded lookup depth to 7 days to guarantee data availability on weekends/holidays
+                data = yf.Ticker(symbol).history(period="7d") 
                 if len(data) >= 2:
                     prev_close = data['Close'].iloc[-2]
                     curr_close = data['Close'].iloc[-1]
@@ -62,9 +62,10 @@ if st.button("EXECUTE ALL-SECTOR CONSENSENS SCAN", type="primary", use_container
                     if symbol == "DX-Y.NYB":
                         w = -2.0 if pct_change > 0 else 2.0
                         status = "🟢 Falling (Bullish)" if pct_change <= 0 else "🔴 Rising (Bearish)"
-                    elif symbol == "^TNX":
-                        w = -2.0 if pct_change > 0 else 2.0
-                        status = "🟢 Falling (Bullish)" if pct_change <= 0 else "🔴 Rising (Bearish)"
+                    elif symbol == "TLT":
+                        # Rising bond prices mean falling yields (Bullish for Gold)
+                        w = 2.0 if pct_change > 0 else -2.0
+                        status = "🟢 Yields Dropping (Bullish)" if pct_change > 0 else "🔴 Yields Rising (Bearish)"
                     elif symbol == "^VIX":
                         w = 1.5 if curr_close > 20 else -0.5
                         status = f"📊 Volatility Level: {curr_close:.2f}"
@@ -74,18 +75,19 @@ if st.button("EXECUTE ALL-SECTOR CONSENSENS SCAN", type="primary", use_container
                     elif symbol == "TIP":
                         w = 1.5 if pct_change > 0 else -1.5
                         status = "🟢 Bonds Inflow (Bullish)" if pct_change > 0 else "🔴 Bonds Outflow (Bearish)"
-                    elif symbol == "XAUEUR=X":
-                        w = 1.5 if pct_change > 0 else -1.0
-                        status = "🟢 Safe Haven Demand" if pct_change > 0 else "🔴 Low Currency Inflow"
+                    elif symbol == "FXE":
+                        # A falling Euro proxy relative strength indicates safe-haven consolidation
+                        w = -1.0 if pct_change > 0 else 1.5
+                        status = "🔴 Euro Strong" if pct_change > 0 else "🟢 Inflows Active"
                         
                     master_score += w
                     ticker_details.append(f"**{name}**: {status} | *Weight: {w:+.1f} pts*")
                 else:
-                    error_logs.append(f"❌ **{name}** (`{symbol}`): Broken array frame length from broker feed.")
+                    error_logs.append(f"❌ **{name}** (`{symbol}`): Empty historical frame returned from API server.")
             except Exception as e:
-                error_logs.append(f"⚠️ **{name}** (`{symbol}`): Connection timeout or market weekend freeze.")
+                error_logs.append(f"⚠️ **{name}** (`{symbol}`): Connection timeout or market freeze loop.")
 
-        # --- GOLD MINERS UNANIMOUS CLUSTER (YOUR REQUEST) ---
+        # --- GOLD MINERS UNANIMOUS CLUSTER Basket ---
         miner_basket = {
             "Barrick Gold": "GOLD",
             "Newmont Corp": "NEM",
@@ -99,7 +101,7 @@ if st.button("EXECUTE ALL-SECTOR CONSENSENS SCAN", type="primary", use_container
         
         for m_name, m_symbol in miner_basket.items():
             try:
-                m_data = yf.Ticker(m_symbol).history(period="3d")
+                m_data = yf.Ticker(m_symbol).history(period="7d")
                 if len(m_data) >= 2:
                     m_change = m_data['Close'].iloc[-1] - m_data['Close'].iloc[-2]
                     miner_directions.append(1 if m_change > 0 else -1)
@@ -108,14 +110,13 @@ if st.button("EXECUTE ALL-SECTOR CONSENSENS SCAN", type="primary", use_container
             except:
                 miner_errors += 1
                 
-        # Unanimous voting rule execution logic
         miner_points = 0.0
         miner_status_display = "⚠️ Cluster Blocked due to server data errors."
         
         if miner_errors == 0 and len(miner_directions) == 5:
             if all(d == 1 for d in miner_directions):
                 miner_points = 2.5
-                miner_status_display = "🟢 UNANIMOUS BULllSH ACCUMULATION (All 5 Giants are rising)"
+                miner_status_display = "🟢 UNANIMOUS BULLISH ACCUMULATION (All 5 Giants are rising)"
             elif all(d == -1 for d in miner_directions):
                 miner_points = -2.5
                 miner_status_display = "🔴 UNANIMOUS BEARISH DISTRIBUTION (All 5 Giants are falling)"
@@ -126,11 +127,10 @@ if st.button("EXECUTE ALL-SECTOR CONSENSENS SCAN", type="primary", use_container
             error_logs.append(f"⚠️ **Gold Miners Basket**: Skipped because {miner_errors} stocks timed out.")
             
         master_score += miner_points
-
-        # --- PHASE 3: LIVE HEADLINES AGGREGATOR ---
+        # --- PHASE 3: LIVE STABLE GOOGLE NEWS GLOBAL ECONOMIC RSS AGGREGATOR ---
         rss_urls = [
-            "https://cnbc.com",
-            "https://cnbc.com"
+            "https://google.com",
+            "https://google.com"
         ]
         
         news_score_total = 0.0
@@ -150,7 +150,7 @@ if st.button("EXECUTE ALL-SECTOR CONSENSENS SCAN", type="primary", use_container
                         tag = "🟢 Bullish" if comp_score > 0 else "🔴 Bearish" if comp_score < 0 else "⚪ Neutral"
                         news_log_entries.append(f"*{tag}* -> {text_headline}")
                 else:
-                    error_logs.append(f"⚠️ **News Feed Link** ({url[:30]}...): Returned empty headline database array.")
+                    error_logs.append(f"⚠️ **News Feed Link** ({url[:30]}...): Empty response returned.")
             except:
                 pass
                 
@@ -161,7 +161,6 @@ if st.button("EXECUTE ALL-SECTOR CONSENSENS SCAN", type="primary", use_container
         st.markdown("---")
         st.subheader("📊 Definitive Fundamental Directive")
         
-        # Risk Decision Logic Windows
         if master_score >= 4.5:
             st.success("### 🔥 DIRECTION: STRONG BULLISH BUY\nAll macro pillars, real yields, and mining equities are in perfect bullish alignment.")
         elif master_score <= -4.5:
@@ -171,19 +170,16 @@ if st.button("EXECUTE ALL-SECTOR CONSENSENS SCAN", type="primary", use_container
             
         st.metric(label="Unified Core Score", value=f"{master_score:+.2f} Points", delta="Signal unlock threshold requires +/- 4.5")
         
-        # 1. Main Intermarket Drawer
         with st.expander("🔎 View Macro Assets Matrix Breakdown", expanded=True):
             for detail in ticker_details:
                 st.write(detail)
             st.write(f"**Gold Miners Basket Consensus**: {miner_status_display} | *Weight: {miner_points:+.1f} pts*")
                 
-        # 2. Headline Scraper Drawer
         with st.expander(f"📰 View Scraped Headline Database Logs ({headline_counter} items)", expanded=False):
             st.write(f"**Headline Structural Impact Score**: `{news_points:+.2f} pts`")
             for log in news_log_entries:
                 st.write(log)
                 
-        # 3. Dynamic Visual Error Diagnostics Drawer (Your Request)
         if len(error_logs) > 0:
             with st.expander("⚠️ View Real-Time Server Error Audits", expanded=True):
                 st.info("The items listed below timed out or returned frozen weekend records. The system automatically isolated them to protect your score's accuracy.")
