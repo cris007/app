@@ -200,7 +200,8 @@ if st.button("RUN DEEP SECTOR LIQUIDITY AND METRIC SCAN", type="primary", use_co
         # Master Net Score Calculation Formula
         master_final_score = dxy_score + tlt_score + miner_points + secondary_points + news_points
         if core_direction == 0: master_final_score = 0.0
-        # --- PHASE 3: RENDER THE SPEEDOMETER METER HUD ---
+
+          # --- PHASE 3: RENDER THE SPEEDOMETER METER HUD ---
         if core_direction == 0:
             label_text, panel_color = "CHOP WAIT / FLAT", "#FF9900"
             needle_angle = 90 
@@ -213,35 +214,44 @@ if st.button("RUN DEEP SECTOR LIQUIDITY AND METRIC SCAN", type="primary", use_co
             clamped_score = max(-8.0, min(8.0, master_final_score))
             needle_angle = 90 + (clamped_score * 8.75)
 
-        # SVG/HTML Injection Layer for the Semi-Circle Gauge Dashboard Cockpit
-        st.markdown(f"""
-            <div class="gauge-container">
-                <div class="gauge-bg">
-                    <svg viewBox="0 0 200 110" width="100%" height="100%" style="max-width: 320px;">
-                        <!-- Background Gauge Arc Spectrum Lines -->
-                        <path d="M20,100 A80,80 0 0,1 180,100" fill="none" stroke="#22332A" stroke-width="12" stroke-linecap="round"/>
-                        
-                        <!-- Colored Zones Highlights -->
-                        <path d="M20,100 A80,80 0 0,1 60,43" fill="none" stroke="#FF0033" stroke-width="4" opacity="0.4"/>
-                        <path d="M60,43 A80,80 0 0,1 140,43" fill="none" stroke="#FF9900" stroke-width="4" opacity="0.4"/>
-                        <path d="M140,43 A80,80 0 0,1 180,100" fill="none" stroke="#00FF66" stroke-width="4" opacity="0.4"/>
-                        
-                        <!-- Fixed Text Boundaries (Coordinates adjusted to fit mobile viewports) -->
-                        <text x="5" y="108" fill="#889988" font-size="7" font-family="Arial" text-anchor="start">STRONG SELL</text>
-                        <text x="48" y="38" fill="#889988" font-size="7" font-family="Arial" text-anchor="middle">SELL</text>
-                        <text x="100" y="14" fill="#889988" font-size="8" font-family="Arial" text-anchor="middle" font-weight="bold">NEUTRAL</text>
-                        <text x="152" y="38" fill="#889988" font-size="7" font-family="Arial" text-anchor="middle">BUY</text>
-                        <text x="195" y="108" fill="#889988" font-size="7" font-family="Arial" text-anchor="end">STRONG BUY</text>
-                        
-                        <!-- Center Pin Pivot Anchor Dot -->
-                        <circle cx="100" cy="100" r="6" fill="#FFFFFF" stroke="#121A16" stroke-width="2"/>
-                        
-                        <!-- Dynamic Rotating Pointer Needle -->
-                        <line x1="100" y1="100" x2="100" y2="28" stroke="{panel_color}" stroke-width="3" stroke-linecap="round"
-                              transform="rotate({needle_angle - 90} 100 100)" style="transition: transform 0.5s ease-in-out; filter: drop-shadow(0px 0px 4px {panel_color}88);"/>
-                    </svg>
-                    <div class="status-text" style="color: {panel_color}; text-shadow: 0 0 12px {panel_color}55; margin-top: -5px;">{label_text}</div>
-                    <div style="font-size: 26px; font-weight: bold; margin-top: 2px; color: #FFFFFF;">{master_final_score:+.2f} <span style="font-size:13px; color:#889988; font-weight:normal;">PTS</span></div>
-                </div>
+        # STSTRICT HTML ENFORCEMENT CONTAINER (Bypasses any markdown blocks)
+        html_payload = f"""
+        <div style="display: flex; justify-content: center; align-items: center; margin: 20px 0; font-family: Arial, sans-serif;">
+            <div style="width: 100%; max-width: 400px; background: #121A16; border-radius: 20px; border: 1px solid #233D2A; padding: 20px; text-align: center; box-sizing: border-box;">
+                <div style="font-size: 14px; text-transform: uppercase; color: #889988; letter-spacing: 1px;">Market Directive Meter</div>
+                
+                <svg viewBox="0 0 200 110" width="100%" height="100%" style="max-width: 320px; margin-top: 15px;">
+                    <path d="M20,100 A80,80 0 0,1 180,100" fill="none" stroke="#22332A" stroke-width="12" stroke-linecap="round"/>
+                    <path d="M20,100 A80,80 0 0,1 60,43" fill="none" stroke="#FF0033" stroke-width="4" opacity="0.4"/>
+                    <path d="M60,43 A80,80 0 0,1 140,43" fill="none" stroke="#FF9900" stroke-width="4" opacity="0.4"/>
+                    <path d="M140,43 A80,80 0 0,1 180,100" fill="none" stroke="#00FF66" stroke-width="4" opacity="0.4"/>
+                    <text x="5" y="108" fill="#889988" font-size="7" font-family="Arial" text-anchor="start">STRONG SELL</text>
+                    <text x="48" y="38" fill="#889988" font-size="7" font-family="Arial" text-anchor="middle">SELL</text>
+                    <text x="100" y="14" fill="#889988" font-size="8" font-family="Arial" text-anchor="middle" font-weight="bold">NEUTRAL</text>
+                    <text x="152" y="38" fill="#889988" font-size="7" font-family="Arial" text-anchor="middle">BUY</text>
+                    <text x="195" y="108" fill="#889988" font-size="7" font-family="Arial" text-anchor="end">STRONG BUY</text>
+                    <circle cx="100" cy="100" r="6" fill="#FFFFFF" stroke="#121A16" stroke-width="2"/>
+                    <line x1="100" y1="100" x2="100" y2="28" stroke="{panel_color}" stroke-width="3" stroke-linecap="round"
+                          transform="rotate({needle_angle - 90} 100 100)" style="transition: transform 0.5s ease-in-out; filter: drop-shadow(0px 0px 4px {panel_color}88);"/>
+                </svg>
+                
+                <div style="font-size: 24px; font-weight: bold; text-transform: uppercase; letter-spacing: 1.5px; margin-top: 10px; color: {panel_color}; text-shadow: 0 0 12px {panel_color}55;">{label_text}</div>
+                <div style="font-size: 26px; font-weight: bold; margin-top: 2px; color: #FFFFFF;">{master_final_score:+.2f} <span style="font-size:13px; color:#889988; font-weight:normal;">PTS</span></div>
             </div>
-        """, unsafe_allow_html=True)
+        </div>
+        """
+        st.components.v1.html(html_payload, height=270, scrolling=False)
+
+        # --- PHASE 4: RENDER THE PROFESSIONAL SCORECARD PERFORMANCE TABLE ---
+        st.subheader("📋 Macro Portfolio Scorecard Matrix")
+        df_scorecard = pd.DataFrame(table_rows)
+        st.dataframe(df_scorecard, use_container_width=True, hide_index=True)
+
+        # Dropdown Logs Tracing Sections
+        if core_direction != 0 and headline_counter > 0:
+            with st.expander("📰 Trace Scraped Headline Intelligence Streams", expanded=False):
+                for entry in news_log_entries: st.write(entry)
+                
+        if len(error_logs) > 0:
+            with st.expander("⚠️ Review Active Connectivity Diagnostic Audits", expanded=True):
+                for log in error_logs: st.error(log)
