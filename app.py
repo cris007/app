@@ -200,58 +200,36 @@ if st.button("RUN DEEP SECTOR LIQUIDITY AND METRIC SCAN", type="primary", use_co
         if core_direction == 0: master_final_score = 0.0
 
         # --- PHASE 3: RENDER THE SPEEDOMETER METER HUD ---
-        # Map master metrics scores dynamically onto our color spectrum panel labels
         if core_direction == 0:
             label_text, panel_color = "CHOP WAIT / FLAT", "#FF9900"
-            # Force needle straight up to Neutral if core conflict is active
             needle_angle = 90 
         else:
-            if master_final_score >= 5.5:
-                label_text, panel_color = "STRONG BUY", "#00FF66"
-            elif master_final_score >= 1.0:
-                label_text, panel_color = "BUY", "#88FF88"
-            elif master_final_score <= -5.5:
-                label_text, panel_color = "STRONG SELL", "#FF0033"
-            else:
-                label_text, panel_color = "SELL", "#FF8888"
+            if master_final_score >= 5.5: label_text, panel_color = "STRONG BUY", "#00FF66"
+            elif master_final_score >= 1.0: label_text, panel_color = "BUY", "#88FF88"
+            elif master_final_score <= -5.5: label_text, panel_color = "STRONG SELL", "#FF0033"
+            else: label_text, panel_color = "SELL", "#FF8888"
             
-            # Mathematically map score bounds (-8.0 to +8.0) smoothly onto a 180-degree gauge arc
-            # -8.0 score maps to 20 degrees (Strong Sell), 0.0 maps to 90 degrees (Neutral), +8.0 maps to 160 degrees (Strong Buy)
             clamped_score = max(-8.0, min(8.0, master_final_score))
             needle_angle = 90 + (clamped_score * 8.75)
 
-        # SVG/HTML Injection Layer for the Semi-Circle Gauge Dashboard Cockpit
+        # CRITICAL RENDERING INJECTION FIX: Using Streamlit's official string parsing parameter tag
         st.markdown(f"""
             <div class="gauge-container">
                 <div class="gauge-bg">
                     <svg viewBox="0 0 200 110" width="100%" height="100%" style="max-width: 320px;">
-                        <!-- Background Gauge Arc Spectrum Lines -->
                         <path d="M20,100 A80,80 0 0,1 180,100" fill="none" stroke="#22332A" stroke-width="12" stroke-linecap="round"/>
-                        
-                        <!-- Colored Zones Highlights -->
-                        <!-- Strong Sell to Sell Zone (Red) -->
                         <path d="M20,100 A80,80 0 0,1 60,43" fill="none" stroke="#FF0033" stroke-width="4" opacity="0.4"/>
-                        <!-- Neutral Zone (Amber) -->
                         <path d="M60,43 A80,80 0 0,1 140,43" fill="none" stroke="#FF9900" stroke-width="4" opacity="0.4"/>
-                        <!-- Buy to Strong Buy Zone (Green) -->
                         <path d="M140,43 A80,80 0 0,1 180,100" fill="none" stroke="#00FF66" stroke-width="4" opacity="0.4"/>
-                        
-                        <!-- Gauge Scale Text Labels -->
                         <text x="15" y="108" fill="#889988" font-size="7" font-family="Arial" text-anchor="middle">STRONG SELL</text>
                         <text x="48" y="38" fill="#889988" font-size="7" font-family="Arial" text-anchor="middle">SELL</text>
                         <text x="100" y="14" fill="#889988" font-size="8" font-family="Arial" text-anchor="middle" font-weight="bold">NEUTRAL</text>
                         <text x="152" y="38" fill="#889988" font-size="7" font-family="Arial" text-anchor="middle">BUY</text>
                         <text x="185" y="108" fill="#889988" font-size="7" font-family="Arial" text-anchor="middle">STRONG BUY</text>
-                        
-                        <!-- Center Pin Pivot Anchor Dot -->
                         <circle cx="100" cy="100" r="6" fill="#FFFFFF" stroke="#121A16" stroke-width="2"/>
-                        
-                        <!-- Dynamic Rotating Pointer Needle -->
                         <line x1="100" y1="100" x2="100" y2="28" stroke="{panel_color}" stroke-width="3" stroke-linecap="round"
                               transform="rotate({needle_angle - 90} 100 100)" style="transition: transform 0.5s ease-in-out; filter: drop-shadow(0px 0px 4px {panel_color}88);"/>
                     </svg>
-                    
-                    <!-- Dynamic Label and Score Breakdown Panel -->
                     <div class="status-text" style="color: {panel_color}; text-shadow: 0 0 12px {panel_color}55; margin-top: -5px;">{label_text}</div>
                     <div style="font-size: 26px; font-weight: bold; margin-top: 2px; color: #FFFFFF;">{master_final_score:+.2f} <span style="font-size:13px; color:#889988; font-weight:normal;">PTS</span></div>
                 </div>
@@ -260,19 +238,14 @@ if st.button("RUN DEEP SECTOR LIQUIDITY AND METRIC SCAN", type="primary", use_co
 
         # --- PHASE 4: RENDER THE PROFESSIONAL SCORECARD PERFORMANCE TABLE ---
         st.subheader("📋 Macro Portfolio Scorecard Matrix")
-        
-        # Build out and view the interactive DataFrame Grid sorted by asset priority levels
-        import pandas as pd
         df_scorecard = pd.DataFrame(table_rows)
         st.dataframe(df_scorecard, use_container_width=True, hide_index=True)
 
-        # --- PHASE 5: DROPDOWN AUDIT AND DIAGNOSTIC LOGS TRACING SECTIONS ---
+        # Dropdown Logs Tracing Sections
         if core_direction != 0 and headline_counter > 0:
             with st.expander("📰 Trace Scraped Headline Intelligence Streams", expanded=False):
-                for entry in news_log_entries: 
-                    st.write(entry)
+                for entry in news_log_entries: st.write(entry)
                 
         if len(error_logs) > 0:
             with st.expander("⚠️ Review Active Connectivity Diagnostic Audits", expanded=True):
-                for log in error_logs: 
-                    st.error(log)
+                for log in error_logs: st.error(log)
